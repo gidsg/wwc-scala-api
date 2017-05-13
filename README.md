@@ -6,14 +6,15 @@ This is a simple Scala tutorial aimed at beginners, covering:
  * HTTP Requests (using Http4s)
  * Parsing Responses
  * Collections
+
+##What you need
  
- ##What you need
- 
- You will need the following installed
+You will need the following installed
+
  * SBT
  * Scala (+Java)
  * Intellij Community Edition (or IDE of your choice)
  
- ##Other Guides
+##Other Guides
  
- TBD
+TBD
