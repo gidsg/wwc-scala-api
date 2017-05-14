@@ -6,7 +6,6 @@ import io.circe.generic.auto._
 import org.http4s.client.blaze.PooledHttp1Client
 import org.http4s.dsl._
 
-
 object Webapp {
 
   val httpClient = PooledHttp1Client()
@@ -24,6 +23,8 @@ object Webapp {
   implicit val multiEncoder = jsonEncoderOf[MultiPostcodeResponse]
   //implicit val postcodeMapEncoder = jsonEncoderOf[Map[String, List[String]]] //Solution: to using an encoder instead of Serialization directly
   implicit val postcodeMapEncoder = jsonEncoderOf[Map[String, List[(String, String)]]]
+  implicit val multiPostcodeReqDecoder = jsonOf[Map[String, List[String]]]
+  implicit val multiPostcodeReqEncoder = jsonEncoderOf[Map[String, List[String]]]
 
   val service = HttpService {
     case GET -> Root =>
@@ -43,5 +44,8 @@ object Webapp {
 
       val getRequestTask = httpClient.expect[MultiPostcodeResponse](s"http://api.postcodes.io/postcodes/${postcode}/nearest")
       getRequestTask.flatMap(response => Ok(responseJson(response)))
+
+    case req @ POST -> Root / "locations" / "nearest" =>
+      req.as[Map[String, List[String]]] flatMap ( json => Ok(json))
   }
 }
