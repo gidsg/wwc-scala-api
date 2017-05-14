@@ -24,6 +24,7 @@ object Webapp {
   implicit val encoder = jsonEncoderOf[PostcodeResponse]
   implicit val multiDecoder = jsonOf[MultiPostcodeResponse]
   implicit val multiEncoder = jsonEncoderOf[MultiPostcodeResponse]
+  implicit val postcodeMapEncoder = jsonEncoderOf[Map[String, List[String]]]
 
   val service = HttpService {
     case GET -> Root =>
@@ -38,7 +39,7 @@ object Webapp {
 
     case GET -> Root / "locations" / postcode / "nearest" =>
       def responseJson(response: MultiPostcodeResponse) = {
-        Serialization.write(Map("postcodes" -> response.result.map(postcodeRes => postcodeRes.postcode)))
+        Map("postcodes" -> response.result.map(postcodeRes => postcodeRes.postcode))
       }
 
       val getRequestTask = httpClient.expect[MultiPostcodeResponse](s"http://api.postcodes.io/postcodes/${postcode}/nearest")
