@@ -7,8 +7,6 @@ import org.http4s.circe._
 import org.http4s.client.blaze.PooledHttp1Client
 import org.http4s.dsl._
 
-import scalaz.concurrent.Task
-
 object Webapp {
   val httpClient = PooledHttp1Client()
 
