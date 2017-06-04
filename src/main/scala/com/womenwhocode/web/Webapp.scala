@@ -26,12 +26,16 @@ object Webapp {
   implicit val multiPostcodeReqDecoder = jsonOf[Map[String, List[String]]]
   implicit val multiPostcodeReqEncoder = jsonEncoderOf[Map[String, List[String]]]
   implicit val ListEncoder = jsonEncoderOf[List[String]]
+  implicit val codeEncoder = jsonEncoderOf[CodeDetail]
+  implicit val codeDecoder = jsonOf[CodeDetail]
+  implicit val bulkPostcodeMapEncoder = jsonEncoderOf[Map[String, List[(String, String, String, String)]]]
 
   def responseJson(response: MultiPostcodeResponse) =
     Map("postcodes" -> response.result.map(postcodeRes => (postcodeRes.postcode, postcodeRes.region)))
 
   def responseJson(response: BulkPostcodeResponse) =
-    Map("postcodes" -> response.result.map(postcodeRes => (postcodeRes.result.postcode, postcodeRes.result.region)))
+    Map("postcodes" -> response.result.map(postcodeRes => (postcodeRes.result.postcode, postcodeRes.result.region,
+      postcodeRes.result.codes.admin_district, postcodeRes.result.codes.admin_county)))
 
   def get[A: EntityDecoder](query: String) =
     httpClient.expect[A](s"http://api.postcodes.io/postcodes/$query")
