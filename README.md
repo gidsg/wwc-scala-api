@@ -16,9 +16,11 @@ You will need the following installed
  * Intellij Community Edition (or IDE of your choice)
 
 ##Answers
+
 The answers are available if you get stuck. You can find them in the answers branch https://github.com/claritee/wwc-scala-api/tree/answers
 
 ##Using this tutorial
+
 Feel free to fork/clone the repository. 
 If you want to contribute, please fork and raise a PR, thanks :)
 
