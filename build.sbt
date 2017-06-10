@@ -1,3 +1,5 @@
+scalaVersion := "2.12.1"
+
 libraryDependencies ++= Seq(
   "org.http4s"     %% "http4s-blaze-server" % "0.15.7a",
   "org.http4s"     %% "http4s-blaze-client" % "0.15.7a",
