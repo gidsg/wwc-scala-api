@@ -35,6 +35,14 @@ object Webapp {
       Ok(s"locations endpoint")
 
     case GET -> Root / "locations" / postcode =>
+      // TODO: redo step 1 without encoder, then with encoder
+//      val uri = Uri.uri("http://api.postcodes.io/postcodes/") / postcode
+//      val res = httpClient.expect(uri)(jsonOf[PostcodeResponse])
+//      res.flatMap(postcodeResponse => Ok(postcodeResponse))
+
+//      val res = httpClient.expect[PostcodeResponse](uri)
+//      res.flatMap(postcodeResponse => Ok(postcodeResponse))
+
       val getRequestTask = get[PostcodeResponse](postcode)
       getRequestTask.flatMap(postcodeResponse => Ok(postcodeResponse))
 
