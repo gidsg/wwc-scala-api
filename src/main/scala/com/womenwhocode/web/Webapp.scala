@@ -39,8 +39,9 @@ object Webapp {
       getRequestTask.flatMap(postcodeResponse => Ok(postcodeResponse))
 
     case GET -> Root / "locations" / postcode / "nearest" =>
-        val getRequestTask = get[MultiPostcodeResponse](s"$postcode/nearest")
-        getRequestTask.flatMap(response => Ok(responseJson(response)))
-
+      for {
+        nearest <- get[MultiPostcodeResponse](s"$postcode/nearest")
+        resp <- Ok(responseJson(nearest))
+      } yield resp
   }
 }
