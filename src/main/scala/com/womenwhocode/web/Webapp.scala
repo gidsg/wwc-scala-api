@@ -14,7 +14,8 @@ object Webapp {
   case class PostcodeResponse(status: Int, result: PostcodeResult)
   case class CodeDetail(admin_district: String, admin_county: String)
   case class MultiPostcodeResponse(status: Int, result: List[PostcodeResult])
-//  case class BulkPostcodeResponse(status: Int, result: List[PostcodeResponse])
+
+  case class BulkPostcodeResponse(status: Int, result: List[PostcodeResponse])
 
   implicit val decoder = jsonOf[PostcodeResponse]
   implicit val encoder = jsonEncoderOf[PostcodeResponse]
@@ -29,6 +30,9 @@ object Webapp {
 
   def responseJson(response: MultiPostcodeResponse) =
     Map("postcodes" -> response.result.map(postcodeRes => (postcodeRes.postcode, postcodeRes.region)))
+
+  def findPostcodes(postcodes: List[String]) =
+    Ok(postcodes.asJson)
 
   val service = HttpService {
     case GET -> Root =>
@@ -56,6 +60,8 @@ object Webapp {
       } yield resp
 
     case req @ POST -> Root / "locations" / "bulk" =>
-      req.as[Map[String, List[String]]] flatMap ( postcodes => Ok(postcodes))
+      val bulkRequest = req.as[Map[String, List[String]]]
+      bulkRequest.flatMap ( input => findPostcodes(input.head._2) )
   }
 }
+
