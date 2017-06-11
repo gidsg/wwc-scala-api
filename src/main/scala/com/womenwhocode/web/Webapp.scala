@@ -14,12 +14,15 @@ object Webapp {
   case class PostcodeResponse(status: Int, result: PostcodeResult)
   case class CodeDetail(admin_district: String, admin_county: String)
   case class MultiPostcodeResponse(status: Int, result: List[PostcodeResult])
+//  case class BulkPostcodeResponse(status: Int, result: List[PostcodeResponse])
 
   implicit val decoder = jsonOf[PostcodeResponse]
   implicit val encoder = jsonEncoderOf[PostcodeResponse]
   implicit val multiDecoder = jsonOf[MultiPostcodeResponse]
   implicit val multiEncoder = jsonEncoderOf[MultiPostcodeResponse]
   implicit val postcodeMapEncoder = jsonEncoderOf[Map[String, List[(String, String)]]]
+  implicit val multiPostcodeReqDecoder = jsonOf[Map[String, List[String]]]
+  implicit val multiPostcodeReqEncoder = jsonEncoderOf[Map[String, List[String]]]
 
   def get[decoder: EntityDecoder](query: String) =
     httpClient.expect[decoder](s"http://api.postcodes.io/postcodes/$query")
@@ -51,5 +54,8 @@ object Webapp {
         nearest <- get[MultiPostcodeResponse](s"$postcode/nearest")
         resp <- Ok(responseJson(nearest))
       } yield resp
+
+    case req @ POST -> Root / "locations" / "bulk" =>
+      req.as[Map[String, List[String]]] flatMap ( postcodes => Ok(postcodes))
   }
 }
