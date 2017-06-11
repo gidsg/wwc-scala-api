@@ -21,7 +21,7 @@ object Webapp {
   implicit val multiDecoder = jsonOf[MultiPostcodeResponse]
   implicit val multiEncoder = jsonEncoderOf[MultiPostcodeResponse]
   implicit val bulkDecoder = jsonOf[BulkPostcodeResponse]
-  //implicit val postcodeMapEncoder = jsonEncoderOf[Map[String, List[String]]] //Solution: to using an encoder instead of Serialization directly
+  //implicit val postcodeMapEncoder = jsonEncoderOf[Map[String, List[String]]] //Solution to Exercise C: to using an encoder instead of asJson directly
   implicit val postcodeMapEncoder = jsonEncoderOf[Map[String, List[(String, String)]]]
   implicit val multiPostcodeReqDecoder = jsonOf[Map[String, List[String]]]
   implicit val multiPostcodeReqEncoder = jsonEncoderOf[Map[String, List[String]]]
@@ -37,8 +37,8 @@ object Webapp {
     Map("postcodes" -> response.result.map(postcodeRes => (postcodeRes.result.postcode, postcodeRes.result.region,
       postcodeRes.result.codes.admin_district, postcodeRes.result.codes.admin_county)))
 
-  def get[A: EntityDecoder](query: String) =
-    httpClient.expect[A](s"http://api.postcodes.io/postcodes/$query")
+  def get[decoder: EntityDecoder](query: String) =
+    httpClient.expect[decoder](s"http://api.postcodes.io/postcodes/$query")
 
 
   def findPostcodes(postcodes: List[String]) = {
