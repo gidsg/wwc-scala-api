@@ -38,6 +38,10 @@ object Webapp {
   def responseJson(response: MultiPostcodeResponse) =
     Map("postcodes" -> response.result.map(postcodeRes => (postcodeRes.postcode, postcodeRes.region)))
 
+  def responseJson(resp: BulkPostcodeResponse) = {
+    Map("postcodes" -> resp.result).asJson
+  }
+
   def findPostcodes(postcodes: List[String]) = {
     val target = uri("http://api.postcodes.io/postcodes")
     val body = Map("postcodes" -> postcodes).asJson
@@ -73,7 +77,7 @@ object Webapp {
     case req @ POST -> Root / "locations" / "bulk" =>
       val bulkRequest = req.as[Map[String, List[String]]]
       val bulkRequestTask = bulkRequest.map(postcodesMap => findPostcodes(postcodesMap.head._2))
-      bulkRequestTask.flatMap(postcodes => postcodes.flatMap(res => Ok(s"${res.status}")))
+      bulkRequestTask.flatMap(postcodes => postcodes.flatMap(resp => Ok(responseJson(resp))))
 
   }
 }
