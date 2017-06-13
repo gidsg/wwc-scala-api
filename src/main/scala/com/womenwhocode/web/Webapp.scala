@@ -2,6 +2,7 @@ package com.womenwhocode.web
 
 import org.http4s._
 import org.http4s.circe._
+import org.http4s.client._
 import org.http4s.client.blaze._
 import org.http4s.dsl._
 import io.circe.generic.auto._
@@ -10,20 +11,26 @@ import io.circe.syntax._
 object Webapp {
   val httpClient = PooledHttp1Client()
 
-  case class PostcodeResult(postcode: String, region: String, country: String, codes: CodeDetail)
-  case class PostcodeResponse(status: Int, result: PostcodeResult)
+  case class PostcodeResult(postcode: String, country: String, region: String, codes: CodeDetail)
+  case class PostcodeResponse(result: PostcodeResult)
   case class CodeDetail(admin_district: String, admin_county: String)
   case class MultiPostcodeResponse(status: Int, result: List[PostcodeResult])
-
   case class BulkPostcodeResponse(status: Int, result: List[PostcodeResponse])
 
   implicit val decoder = jsonOf[PostcodeResponse]
   implicit val encoder = jsonEncoderOf[PostcodeResponse]
   implicit val multiDecoder = jsonOf[MultiPostcodeResponse]
   implicit val multiEncoder = jsonEncoderOf[MultiPostcodeResponse]
+
   implicit val postcodeMapEncoder = jsonEncoderOf[Map[String, List[(String, String)]]]
   implicit val multiPostcodeReqDecoder = jsonOf[Map[String, List[String]]]
   implicit val multiPostcodeReqEncoder = jsonEncoderOf[Map[String, List[String]]]
+  implicit val ListEncoder = jsonEncoderOf[List[String]]
+//  implicit val codeEncoder = jsonEncoderOf[CodeDetail]
+//  implicit val codeDecoder = jsonOf[CodeDetail]
+
+  implicit val bulkDecoder = jsonOf[BulkPostcodeResponse]
+  implicit val bulkPostcodeMapEncoder = jsonEncoderOf[Map[String, List[(String, String, String, String)]]]
 
   def get[decoder: EntityDecoder](query: String) =
     httpClient.expect[decoder](s"http://api.postcodes.io/postcodes/$query")
@@ -31,8 +38,12 @@ object Webapp {
   def responseJson(response: MultiPostcodeResponse) =
     Map("postcodes" -> response.result.map(postcodeRes => (postcodeRes.postcode, postcodeRes.region)))
 
-  def findPostcodes(postcodes: List[String]) =
-    Ok(postcodes.asJson)
+  def findPostcodes(postcodes: List[String]) = {
+    val target = uri("http://api.postcodes.io/postcodes")
+    val body = Map("postcodes" -> postcodes).asJson
+    val req = POST(target, body)
+    httpClient.expect[BulkPostcodeResponse](req)
+  }
 
   val service = HttpService {
     case GET -> Root =>
@@ -61,7 +72,9 @@ object Webapp {
 
     case req @ POST -> Root / "locations" / "bulk" =>
       val bulkRequest = req.as[Map[String, List[String]]]
-      bulkRequest.flatMap ( input => findPostcodes(input.head._2) )
+      val bulkRequestTask = bulkRequest.map(postcodesMap => findPostcodes(postcodesMap.head._2))
+      bulkRequestTask.flatMap(postcodes => postcodes.flatMap(res => Ok(s"${res.status}")))
+
   }
 }
 
