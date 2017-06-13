@@ -39,7 +39,8 @@ object Webapp {
     Map("postcodes" -> response.result.map(postcodeRes => (postcodeRes.postcode, postcodeRes.region)))
 
   def responseJson(resp: BulkPostcodeResponse) = {
-    Map("postcodes" -> resp.result).asJson
+    Map("postcodes" -> resp.result.map(res =>
+      (res.result.postcode, res.result.region, res.result.codes.admin_district, res.result.codes.admin_county))).asJson
   }
 
   def findPostcodes(postcodes: List[String]) = {
