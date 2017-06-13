@@ -4,6 +4,7 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s._
 import org.http4s.circe._
+import org.http4s.client._
 import org.http4s.client.blaze.PooledHttp1Client
 import org.http4s.dsl._
 
@@ -42,7 +43,6 @@ object Webapp {
 
 
   def findPostcodes(postcodes: List[String]) = {
-    import org.http4s.client._
     val req = POST(uri("http://api.postcodes.io/postcodes"), Map("postcodes" -> postcodes).asJson)
     httpClient.expect[BulkPostcodeResponse](req)
   }
